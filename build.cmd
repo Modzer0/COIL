@@ -14,7 +14,6 @@ if "%NUCLEAR_OPTION_DIR%"=="" (
     echo   setx NUCLEAR_OPTION_DIR "D:\SteamLibrary\steamapps\common\Nuclear Option"
     echo.
     echo Then restart this command prompt and try again.
-    pause
     exit /b 1
 )
 
@@ -27,7 +26,6 @@ if not exist "%NUCLEAR_OPTION_DIR%" (
     echo Path: %NUCLEAR_OPTION_DIR%
     echo.
     echo Please verify your NUCLEAR_OPTION_DIR environment variable.
-    pause
     exit /b 1
 )
 
@@ -38,7 +36,6 @@ if not exist "%NUCLEAR_OPTION_DIR%\BepInEx" (
     echo.
     echo Download from: https://github.com/BepInEx/BepInEx/releases
     echo.
-    pause
 )
 
 REM Navigate to project directory
@@ -52,7 +49,6 @@ echo [1/3] Restoring NuGet packages...
 dotnet restore
 if errorlevel 1 (
     echo ERROR: Failed to restore packages!
-    pause
     exit /b 1
 )
 echo.
@@ -62,7 +58,6 @@ echo [2/3] Building in Release mode...
 dotnet build -c Release
 if errorlevel 1 (
     echo ERROR: Build failed!
-    pause
     exit /b 1
 )
 echo.
@@ -77,7 +72,6 @@ if not exist "%NUCLEAR_OPTION_DIR%\BepInEx\plugins" (
 copy /Y "bin\Release\net46\NuclearOptionCOILMod.dll" "%NUCLEAR_OPTION_DIR%\BepInEx\plugins\"
 if errorlevel 1 (
     echo ERROR: Failed to copy DLL!
-    pause
     exit /b 1
 )
 echo.
@@ -91,4 +85,3 @@ echo.
 echo You can now launch Nuclear Option to test the mod.
 echo Check BepInEx console for loading messages.
 echo.
-pause
