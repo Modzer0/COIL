@@ -16,19 +16,21 @@ namespace NuclearOptionCOILMod
         private static bool _initialized = false;
 
         /// <summary>
-        /// Patch Aircraft.Start to inject COIL laser into weapon options
+        /// Patch WeaponManager.Awake to inject COIL laser into weapon options
         /// </summary>
-        [HarmonyPatch(typeof(Aircraft), "Start")]
+        [HarmonyPatch(typeof(WeaponManager), "Awake")]
         [HarmonyPostfix]
-        public static void Aircraft_Start_Postfix(Aircraft __instance)
+        public static void WeaponManager_Awake_Postfix(WeaponManager __instance)
         {
             try
             {
-                // Check if this is a Darkreach bomber
-                if (__instance.definition == null)
+                // Get the aircraft component
+                Aircraft aircraft = __instance.GetComponent<Aircraft>();
+                if (aircraft == null || aircraft.definition == null)
                     return;
 
-                string aircraftName = __instance.definition.unitName;
+                // Check if this is a Darkreach bomber
+                string aircraftName = aircraft.definition.unitName;
                 if (!aircraftName.Contains("Darkreach") && !aircraftName.Contains("darkreach"))
                     return;
 
@@ -39,14 +41,14 @@ namespace NuclearOptionCOILMod
                     _initialized = true;
                 }
 
-                // Add COIL laser to center bay weapon options
+                // Add COIL laser to inner bay weapon options
                 AddCOILToWeaponOptions(__instance);
                 
                 Debug.Log($"[COIL Mod] Added COIL laser to Darkreach weapon options");
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($"[COIL Mod] Error in Aircraft_Start_Postfix: {ex.Message}\n{ex.StackTrace}");
+                Debug.LogError($"[COIL Mod] Error in WeaponManager_Awake_Postfix: {ex.Message}\n{ex.StackTrace}");
             }
         }
 
@@ -98,8 +100,8 @@ namespace NuclearOptionCOILMod
 
             // Create WeaponMount
             _coilWeaponMount = ScriptableObject.CreateInstance<WeaponMount>();
-            _coilWeaponMount.name = "COIL Laser System";
-            _coilWeaponMount.mountName = "COIL Laser System";
+            _coilWeaponMount.name = "ABM COIL Laser";
+            _coilWeaponMount.mountName = "ABM COIL Laser";
             _coilWeaponMount.info = _coilWeaponInfo;
             _coilWeaponMount.prefab = weaponPrefab;
             _coilWeaponMount.ammo = COILModPlugin.MaxShots.Value;
@@ -285,74 +287,84 @@ namespace NuclearOptionCOILMod
                         pixels[j * size + i] = color;
         }
 
-        private static void AddCOILToWeaponOptions(Aircraft aircraft)
+        private static void AddCOILToWeaponOptions(WeaponManager weaponManager)
         {
-            WeaponManager weaponManager = aircraft.GetComponent<WeaponManager>();
             if (weaponManager == null || weaponManager.hardpointSets == null)
             {
                 Debug.LogWarning("[COIL Mod] No WeaponManager or hardpoint sets found");
                 return;
             }
 
-            // Find the center bay (typically index 0 or 1 for Darkreach)
-            // Center bay usually has internal hardpoints with bay doors
-            HardpointSet centerBay = null;
-            int centerBayIndex = -1;
+            Debug.Log($"[COIL Mod] Darkreach has {weaponManager.hardpointSets.Length} hardpoint sets");
+
+            // Log all hardpoint sets to understand the structure
+            for (int i = 0; i < weaponManager.hardpointSets.Length; i++)
+            {
+                HardpointSet hs = weaponManager.hardpointSets[i];
+                Debug.Log($"[COIL Mod] Hardpoint Set {i}: name='{hs.name}', hardpoints={hs.hardpoints.Count}, weaponOptions={hs.weaponOptions.Count}");
+            }
+
+            // Find the inner bay - look for hardpoint set with name containing "inner" or "internal"
+            HardpointSet innerBay = null;
+            int innerBayIndex = -1;
             
             for (int i = 0; i < weaponManager.hardpointSets.Length; i++)
             {
                 HardpointSet hardpointSet = weaponManager.hardpointSets[i];
+                string lowerName = hardpointSet.name.ToLower();
                 
-                // Check if this is an internal bay by looking for bay doors
-                if (hardpointSet.hardpoints != null && hardpointSet.hardpoints.Count > 0)
+                // Look for inner bay specifically
+                if (lowerName.Contains("inner") || lowerName.Contains("internal"))
                 {
-                    foreach (Hardpoint hardpoint in hardpointSet.hardpoints)
-                    {
-                        if (hardpoint.bayDoors != null && hardpoint.bayDoors.Length > 0)
-                        {
-                            // This is an internal bay - check if it's the center one
-                            // Center bay typically has name containing "center" or is the first internal bay
-                            if (hardpointSet.name.ToLower().Contains("center") || 
-                                hardpointSet.name.ToLower().Contains("internal") ||
-                                centerBay == null) // Use first internal bay if no center found
-                            {
-                                centerBay = hardpointSet;
-                                centerBayIndex = i;
-                                Debug.Log($"[COIL Mod] Found center bay: {hardpointSet.name} at index {i}");
-                                break;
-                            }
-                        }
-                    }
-                }
-                
-                if (centerBay != null)
+                    innerBay = hardpointSet;
+                    innerBayIndex = i;
+                    Debug.Log($"[COIL Mod] Found inner bay: {hardpointSet.name} at index {i}");
                     break;
+                }
             }
 
-            if (centerBay == null)
+            if (innerBay == null)
             {
-                Debug.LogWarning("[COIL Mod] Could not find center bay on Darkreach");
+                Debug.LogWarning("[COIL Mod] Could not find inner bay on Darkreach");
                 return;
             }
 
             // Add COIL weapon mount to weapon options if not already present
-            if (!centerBay.weaponOptions.Contains(_coilWeaponMount))
+            if (!innerBay.weaponOptions.Contains(_coilWeaponMount))
             {
-                centerBay.weaponOptions.Add(_coilWeaponMount);
-                Debug.Log($"[COIL Mod] Added COIL laser to {centerBay.name} weapon options (total: {centerBay.weaponOptions.Count})");
+                innerBay.weaponOptions.Add(_coilWeaponMount);
+                Debug.Log($"[COIL Mod] Added COIL laser to {innerBay.name} weapon options (total: {innerBay.weaponOptions.Count})");
+                
+                // Log all weapon options for debugging
+                for (int i = 0; i < innerBay.weaponOptions.Count; i++)
+                {
+                    WeaponMount wm = innerBay.weaponOptions[i];
+                    Debug.Log($"[COIL Mod]   Option {i}: {(wm != null ? wm.mountName : "null")}");
+                }
             }
 
-            // Set precluding hardpoint sets so outer bays must be empty
-            // This ensures COIL takes up the full center bay
-            if (centerBayIndex >= 0)
+            // Configure precluding hardpoint sets
+            // COIL requires forward, rear, and outer bays to be empty
+            if (innerBayIndex >= 0)
             {
-                // Add all other hardpoint sets as precluding (they must be empty for COIL to be used)
+                // Clear existing precluding sets first
+                innerBay.precludingHardpointSets.Clear();
+                
+                // Add all other hardpoint sets as precluding
                 for (byte i = 0; i < weaponManager.hardpointSets.Length; i++)
                 {
-                    if (i != centerBayIndex && !centerBay.precludingHardpointSets.Contains(i))
+                    if (i != innerBayIndex)
                     {
-                        centerBay.precludingHardpointSets.Add(i);
-                        Debug.Log($"[COIL Mod] Set hardpoint {i} as precluding for COIL");
+                        innerBay.precludingHardpointSets.Add(i);
+                        
+                        // Also make the inner bay preclude other hardpoints when COIL is selected
+                        HardpointSet otherSet = weaponManager.hardpointSets[i];
+                        if (!otherSet.precludingHardpointSets.Contains((byte)innerBayIndex))
+                        {
+                            otherSet.precludingHardpointSets.Add((byte)innerBayIndex);
+                        }
+                        
+                        Debug.Log($"[COIL Mod] Set mutual preclusion between inner bay ({innerBayIndex}) and {otherSet.name} ({i})");
                     }
                 }
             }
