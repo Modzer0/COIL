@@ -1,6 +1,7 @@
 using HarmonyLib;
 using UnityEngine;
 using System.Reflection;
+using System.Collections.Generic;
 
 namespace NuclearOptionCOILMod
 {
@@ -12,38 +13,40 @@ namespace NuclearOptionCOILMod
     {
         private static WeaponInfo _coilWeaponInfo;
         private static WeaponMount _coilWeaponMount;
+        private static bool _initialized = false;
 
         /// <summary>
-        /// Patch WeaponManager.SpawnWeapons to inject COIL laser
+        /// Patch Aircraft.Start to inject COIL laser into weapon options
         /// </summary>
-        [HarmonyPatch(typeof(WeaponManager), "SpawnWeapons")]
+        [HarmonyPatch(typeof(Aircraft), "Start")]
         [HarmonyPostfix]
-        public static void SpawnWeapons_Postfix(WeaponManager __instance)
+        public static void Aircraft_Start_Postfix(Aircraft __instance)
         {
             try
             {
                 // Check if this is a Darkreach bomber
-                Aircraft aircraft = __instance.GetComponent<Aircraft>();
-                if (aircraft == null || aircraft.definition == null)
+                if (__instance.definition == null)
                     return;
 
-                // Check aircraft name for Darkreach
-                string aircraftName = aircraft.definition.unitName;
+                string aircraftName = __instance.definition.unitName;
                 if (!aircraftName.Contains("Darkreach") && !aircraftName.Contains("darkreach"))
                     return;
 
                 // Initialize COIL laser if not already done
-                if (_coilWeaponInfo == null)
+                if (!_initialized)
                 {
                     InitializeCOILLaser();
+                    _initialized = true;
                 }
 
-                // Add COIL laser to internal weapon bay
-                AddCOILToAircraft(__instance, aircraft);
+                // Add COIL laser to center bay weapon options
+                AddCOILToWeaponOptions(__instance);
+                
+                Debug.Log($"[COIL Mod] Added COIL laser to Darkreach weapon options");
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($"[COIL Mod] Error in SpawnWeapons_Postfix: {ex.Message}");
+                Debug.LogError($"[COIL Mod] Error in Aircraft_Start_Postfix: {ex.Message}\n{ex.StackTrace}");
             }
         }
 
@@ -83,7 +86,36 @@ namespace NuclearOptionCOILMod
             // Create weapon icon
             _coilWeaponInfo.weaponIcon = CreateCOILIcon();
 
-            Debug.Log($"[COIL Mod] Initialized COIL Laser WeaponInfo");
+            // Create weapon prefab
+            GameObject weaponPrefab = new GameObject("COIL_Laser_Prefab");
+            Object.DontDestroyOnLoad(weaponPrefab);
+            weaponPrefab.SetActive(false);
+            
+            COILLaser coilLaser = weaponPrefab.AddComponent<COILLaser>();
+            coilLaser.info = _coilWeaponInfo;
+            
+            _coilWeaponInfo.weaponPrefab = weaponPrefab;
+
+            // Create WeaponMount
+            _coilWeaponMount = ScriptableObject.CreateInstance<WeaponMount>();
+            _coilWeaponMount.name = "COIL Laser System";
+            _coilWeaponMount.mountName = "COIL Laser System";
+            _coilWeaponMount.info = _coilWeaponInfo;
+            _coilWeaponMount.prefab = weaponPrefab;
+            _coilWeaponMount.ammo = COILModPlugin.MaxShots.Value;
+            _coilWeaponMount.turret = false;
+            _coilWeaponMount.missileBay = false;
+            _coilWeaponMount.radar = false;
+            _coilWeaponMount.Cargo = false;
+            _coilWeaponMount.Troops = false;
+            _coilWeaponMount.GearSafety = true;
+            _coilWeaponMount.GroundSafety = true;
+            _coilWeaponMount.emptyCost = 5000000f; // 5 million - expensive system
+            _coilWeaponMount.emptyMass = 15000f; // 15 tons (realistic for YAL-1 system)
+            _coilWeaponMount.emptyDrag = 0f; // Internal mount
+            _coilWeaponMount.emptyRCS = 0f; // Internal mount
+
+            Debug.Log($"[COIL Mod] Initialized COIL Laser WeaponInfo and WeaponMount");
         }
 
         private static Sprite CreateCOILIcon()
@@ -253,88 +285,77 @@ namespace NuclearOptionCOILMod
                         pixels[j * size + i] = color;
         }
 
-        private static void AddCOILToAircraft(WeaponManager weaponManager, Aircraft aircraft)
+        private static void AddCOILToWeaponOptions(Aircraft aircraft)
         {
-            // Find internal weapon bay hardpoints
-            HardpointSet[] hardpointSets = weaponManager.hardpointSets;
-            if (hardpointSets == null || hardpointSets.Length == 0)
+            WeaponManager weaponManager = aircraft.GetComponent<WeaponManager>();
+            if (weaponManager == null || weaponManager.hardpointSets == null)
             {
-                Debug.LogWarning("[COIL Mod] No hardpoint sets found on Darkreach");
+                Debug.LogWarning("[COIL Mod] No WeaponManager or hardpoint sets found");
                 return;
             }
 
-            // Look for internal bay hardpoints (typically the first few)
-            foreach (HardpointSet hardpointSet in hardpointSets)
+            // Find the center bay (typically index 0 or 1 for Darkreach)
+            // Center bay usually has internal hardpoints with bay doors
+            HardpointSet centerBay = null;
+            int centerBayIndex = -1;
+            
+            for (int i = 0; i < weaponManager.hardpointSets.Length; i++)
             {
-                if (hardpointSet.hardpoints == null || hardpointSet.hardpoints.Count == 0)
-                    continue;
-
-                // Check if this is an internal bay (has bay doors)
-                bool hasInternalBay = false;
-                foreach (Hardpoint hardpoint in hardpointSet.hardpoints)
+                HardpointSet hardpointSet = weaponManager.hardpointSets[i];
+                
+                // Check if this is an internal bay by looking for bay doors
+                if (hardpointSet.hardpoints != null && hardpointSet.hardpoints.Count > 0)
                 {
-                    if (hardpoint.bayDoors != null && hardpoint.bayDoors.Length > 0)
+                    foreach (Hardpoint hardpoint in hardpointSet.hardpoints)
                     {
-                        hasInternalBay = true;
-                        break;
+                        if (hardpoint.bayDoors != null && hardpoint.bayDoors.Length > 0)
+                        {
+                            // This is an internal bay - check if it's the center one
+                            // Center bay typically has name containing "center" or is the first internal bay
+                            if (hardpointSet.name.ToLower().Contains("center") || 
+                                hardpointSet.name.ToLower().Contains("internal") ||
+                                centerBay == null) // Use first internal bay if no center found
+                            {
+                                centerBay = hardpointSet;
+                                centerBayIndex = i;
+                                Debug.Log($"[COIL Mod] Found center bay: {hardpointSet.name} at index {i}");
+                                break;
+                            }
+                        }
                     }
                 }
+                
+                if (centerBay != null)
+                    break;
+            }
 
-                if (hasInternalBay)
+            if (centerBay == null)
+            {
+                Debug.LogWarning("[COIL Mod] Could not find center bay on Darkreach");
+                return;
+            }
+
+            // Add COIL weapon mount to weapon options if not already present
+            if (!centerBay.weaponOptions.Contains(_coilWeaponMount))
+            {
+                centerBay.weaponOptions.Add(_coilWeaponMount);
+                Debug.Log($"[COIL Mod] Added COIL laser to {centerBay.name} weapon options (total: {centerBay.weaponOptions.Count})");
+            }
+
+            // Set precluding hardpoint sets so outer bays must be empty
+            // This ensures COIL takes up the full center bay
+            if (centerBayIndex >= 0)
+            {
+                // Add all other hardpoint sets as precluding (they must be empty for COIL to be used)
+                for (byte i = 0; i < weaponManager.hardpointSets.Length; i++)
                 {
-                    // Create COIL laser weapon for this hardpoint
-                    CreateCOILLaserForHardpoint(hardpointSet, aircraft, weaponManager);
-                    Debug.Log($"[COIL Mod] Added COIL laser to Darkreach internal bay: {hardpointSet.name}");
-                    break; // Only add to one bay
+                    if (i != centerBayIndex && !centerBay.precludingHardpointSets.Contains(i))
+                    {
+                        centerBay.precludingHardpointSets.Add(i);
+                        Debug.Log($"[COIL Mod] Set hardpoint {i} as precluding for COIL");
+                    }
                 }
             }
-        }
-
-        private static void CreateCOILLaserForHardpoint(HardpointSet hardpointSet, Aircraft aircraft, WeaponManager weaponManager)
-        {
-            foreach (Hardpoint hardpoint in hardpointSet.hardpoints)
-            {
-                // Create COIL laser GameObject
-                GameObject laserObj = new GameObject("COIL_Laser");
-                laserObj.transform.SetParent(hardpoint.transform);
-                laserObj.transform.localPosition = Vector3.zero;
-                laserObj.transform.localRotation = Quaternion.identity;
-
-                // Add custom COIL laser component
-                COILLaser coilLaser = laserObj.AddComponent<COILLaser>();
-                coilLaser.info = _coilWeaponInfo;
-                coilLaser.ammo = COILModPlugin.MaxShots.Value;
-                coilLaser.AttachToUnit(aircraft);
-
-                // Register with weapon manager
-                weaponManager.RegisterWeapon(coilLaser, CreateCOILWeaponMount(), hardpoint);
-
-                Debug.Log($"[COIL Mod] Created COIL laser weapon on hardpoint");
-            }
-        }
-
-        private static WeaponMount CreateCOILWeaponMount()
-        {
-            if (_coilWeaponMount != null)
-                return _coilWeaponMount;
-
-            _coilWeaponMount = ScriptableObject.CreateInstance<WeaponMount>();
-            _coilWeaponMount.mountName = "COIL Laser System";
-            _coilWeaponMount.info = _coilWeaponInfo;
-            _coilWeaponMount.ammo = COILModPlugin.MaxShots.Value;
-            _coilWeaponMount.turret = false;
-            _coilWeaponMount.missileBay = false;
-            _coilWeaponMount.radar = false;
-            _coilWeaponMount.Cargo = false;
-            _coilWeaponMount.Troops = false;
-            _coilWeaponMount.GearSafety = true;
-            _coilWeaponMount.GroundSafety = true;
-            _coilWeaponMount.emptyCost = 5000000f; // 5 million - expensive system
-            _coilWeaponMount.emptyMass = 15000f; // 15 tons (realistic for YAL-1 system)
-            _coilWeaponMount.emptyDrag = 0f; // Internal mount
-            _coilWeaponMount.emptyRCS = 0f; // Internal mount
-
-            return _coilWeaponMount;
         }
     }
 }
