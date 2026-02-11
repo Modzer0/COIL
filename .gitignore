@@ -1,0 +1,22 @@
+# BepInEx mod framework
+BepInEx/
+
+# Decompiled game files
+decompiled/
+decompiled qol/
+
+# Build outputs
+NuclearOptionCOILMod/bin/
+NuclearOptionCOILMod/obj/
+*.dll
+*.pdb
+
+# IDE files
+.vs/
+.vscode/
+*.user
+*.suo
+
+# NuGet
+packages/
+*.nupkg

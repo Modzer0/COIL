@@ -1,0 +1,284 @@
+================================================================================
+  COIL LASER MOD - CONFIGURATION EXAMPLES
+================================================================================
+
+This file contains example configurations for different gameplay scenarios.
+Copy the desired preset to your config file at:
+  BepInEx/config/com.nuclearoption.coil.cfg
+
+Remember to restart the game after making changes!
+
+================================================================================
+  PRESET 1: BALANCED (DEFAULT)
+================================================================================
+Description: Well-balanced for normal gameplay
+- One-shot kills on most aircraft
+- Moderate range with high-altitude capability
+- Tactical ammo management required
+
+[COIL Laser]
+MaxRange = 52202
+MaxShots = 30
+ShotDuration = 5
+DamagePerShot = 2000
+FiringArc = 180
+PowerConsumption = 0
+EnableCOIL = true
+
+Total Firing Time: 150 seconds (2.5 minutes)
+Damage Per Shot: 2000
+DPS: 400
+Firing Arc: 180° (forward hemisphere)
+Range Calculation: √(50km² + 15km²) = 52.2km
+Effective Against: All aircraft including high-altitude targets, light ships
+
+
+================================================================================
+  PRESET 2: HIGH POWER
+================================================================================
+Description: Extended range, higher damage, limited ammo
+- Long-range engagements
+- Devastating damage
+- Very tactical (limited shots)
+
+[COIL Laser]
+MaxRange = 75000
+MaxShots = 20
+ShotDuration = 5
+DamagePerShot = 3000
+FiringArc = 180
+PowerConsumption = 0
+EnableCOIL = true
+
+Total Firing Time: 100 seconds (1.7 minutes)
+Damage Per Shot: 3000
+DPS: 600
+Effective Against: All targets including heavy ships
+
+
+================================================================================
+  PRESET 3: TRAINING MODE
+================================================================================
+Description: Easier to use, lots of practice ammo
+- Shorter range (easier aiming)
+- Lots of ammunition
+- Quick shots (rapid fire)
+- Lower damage (multiple shots needed)
+
+[COIL Laser]
+MaxRange = 30000
+MaxShots = 100
+ShotDuration = 3
+DamagePerShot = 1000
+FiringArc = 270
+PowerConsumption = 0
+EnableCOIL = true
+
+Total Firing Time: 300 seconds (5 minutes)
+Damage Per Shot: 1000
+DPS: 333
+Effective Against: Fighters (2 shots), Bombers (3 shots)
+
+
+================================================================================
+  PRESET 4: REALISTIC YAL-1
+================================================================================
+Description: Closer to real-world YAL-1 specifications
+- Very long range
+- Limited chemical fuel
+- Long sustained beam
+- High damage (missile-killer)
+
+[COIL Laser]
+MaxRange = 100000
+MaxShots = 15
+ShotDuration = 8
+DamagePerShot = 4000
+FiringArc = 120
+PowerConsumption = 0
+EnableCOIL = true
+
+Total Firing Time: 120 seconds (2 minutes)
+Damage Per Shot: 4000
+DPS: 500
+Effective Against: Everything (instant destruction)
+
+
+================================================================================
+  PRESET 5: OVERPOWERED (FUN MODE)
+================================================================================
+Description: Maximum power for casual fun
+- Extreme range
+- Nearly unlimited ammo
+- Massive damage
+
+[COIL Laser]
+MaxRange = 100000
+MaxShots = 100
+ShotDuration = 5
+DamagePerShot = 4000
+FiringArc = 360
+PowerConsumption = 0
+EnableCOIL = true
+
+Total Firing Time: 500 seconds (8.3 minutes)
+Damage Per Shot: 4000
+DPS: 800
+Effective Against: Everything instantly
+Warning: Not balanced for competitive play!
+
+
+================================================================================
+  PRESET 6: CHALLENGE MODE
+================================================================================
+Description: For experienced players seeking difficulty
+- Short range (must get close)
+- Very limited ammo
+- Quick shots
+- Moderate damage
+
+[COIL Laser]
+MaxRange = 25000
+MaxShots = 10
+ShotDuration = 3
+DamagePerShot = 1500
+FiringArc = 90
+PowerConsumption = 0
+EnableCOIL = true
+
+Total Firing Time: 30 seconds (0.5 minutes)
+Damage Per Shot: 1500
+DPS: 500
+Effective Against: Fighters (1 shot), Bombers (2 shots)
+
+
+================================================================================
+  PRESET 7: ANTI-SHIP SPECIALIST
+================================================================================
+Description: Optimized for naval targets
+- Medium range
+- High sustained damage
+- Longer beam duration
+- More shots for multiple targets
+
+[COIL Laser]
+MaxRange = 40000
+MaxShots = 50
+ShotDuration = 6
+DamagePerShot = 2500
+FiringArc = 180
+PowerConsumption = 0
+EnableCOIL = true
+
+Total Firing Time: 300 seconds (5 minutes)
+Damage Per Shot: 2500
+DPS: 417
+Effective Against: Ships (2-3 shots), Aircraft (1 shot)
+
+
+================================================================================
+  PRESET 8: POINT DEFENSE
+================================================================================
+Description: Quick engagements, rapid target switching
+- Short range
+- Many quick shots
+- Rapid fire mode
+- Lower damage per shot
+
+[COIL Laser]
+MaxRange = 20000
+MaxShots = 60
+ShotDuration = 2
+DamagePerShot = 1000
+FiringArc = 270
+PowerConsumption = 0
+EnableCOIL = true
+
+Total Firing Time: 120 seconds (2 minutes)
+Damage Per Shot: 1000
+DPS: 500
+Effective Against: Missiles (1 shot), Fighters (1-2 shots)
+
+
+================================================================================
+  CUSTOM CONFIGURATION TIPS
+================================================================================
+
+Adjusting MaxRange:
+  - 10000-30000m  = Close range (dogfighting)
+  - 30000-50000m  = Medium range (balanced)
+  - 50000-75000m  = Long range (standoff)
+  - 75000-100000m = Extreme range (overpowered)
+
+Adjusting MaxShots:
+  - 10-20 shots   = Very limited (tactical)
+  - 20-40 shots   = Moderate (balanced)
+  - 40-60 shots   = Extended (forgiving)
+  - 60-100 shots  = Training (practice)
+
+Adjusting DamagePerSecond:
+  - 200-300 DPS   = Low (multiple shots needed)
+  - 300-500 DPS   = Medium (balanced)
+  - 500-700 DPS   = High (quick kills)
+  - 700-1000 DPS  = Extreme (instant kills)
+
+Damage Calculation:
+  Total Damage = DamagePerSecond × 5 seconds
+  Example: 400 DPS × 5 = 2000 damage per shot
+
+Target HP Reference:
+  - Light Fighter:  500-800 HP
+  - Heavy Fighter:  800-1200 HP
+  - Light Bomber:   1200-1800 HP
+  - Heavy Bomber:   1800-2500 HP
+  - Destroyer:      2500-3500 HP
+  - Cruiser:        3500-5000 HP
+  - Battleship:     5000-8000 HP
+
+
+================================================================================
+  TROUBLESHOOTING
+================================================================================
+
+Config not working?
+  1. Save the file after editing
+  2. Restart the game completely
+  3. Check for typos in parameter names
+  4. Verify numbers don't have quotes
+  5. Check BepInEx console for errors
+
+Game crashes after config change?
+  1. Restore default values
+  2. Check for negative numbers
+  3. Verify MaxShots is a whole number (no decimals)
+  4. Delete config and let it regenerate
+
+Can't find config file?
+  1. Run game at least once with mod installed
+  2. Check BepInEx/config/ folder
+  3. Verify mod is in BepInEx/plugins/
+  4. Copy this example file to BepInEx/config/
+
+
+================================================================================
+  MULTIPLAYER RECOMMENDATIONS (if supported)
+================================================================================
+
+For balanced multiplayer:
+  MaxRange = 40000
+  MaxShots = 20
+  DamagePerSecond = 350
+
+All players should use the same configuration!
+
+
+================================================================================
+  NEED MORE HELP?
+================================================================================
+
+See CONFIGURATION.md for detailed guide
+Check README.md for installation help
+Visit GitHub for support and updates
+
+
+================================================================================

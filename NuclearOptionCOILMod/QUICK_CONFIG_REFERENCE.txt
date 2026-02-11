@@ -1,0 +1,169 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    COIL LASER - QUICK CONFIG REFERENCE                       ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📁 CONFIG FILE LOCATION
+   BepInEx/config/com.nuclearoption.coil.cfg
+
+⚙️ HOW TO CONFIGURE
+   1. Run game once → 2. Close game → 3. Edit config → 4. Restart game
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 PARAMETERS
+
+┌──────────────────┬──────────┬─────────────────────────────────────────────────┐
+│ Parameter        │ Default  │ Description                                     │
+├──────────────────┼──────────┼─────────────────────────────────────────────────┤
+│ MaxRange         │ 52202    │ Range in meters (~52km, high-alt capable)       │
+│ MaxShots         │ 30       │ Number of shots                                 │
+│ ShotDuration     │ 5        │ Seconds per shot                                │
+│ DamagePerShot    │ 2000     │ Total damage per shot                           │
+│ FiringArc        │ 180      │ Degrees from nose (180 = forward hemisphere)    │
+│ PowerConsumption │ 0        │ Power draw (0 = chemical laser)                 │
+│ EnableCOIL       │ true     │ Enable/disable mod                              │
+└──────────────────┴──────────┴─────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 QUICK PRESETS
+
+┌─────────────────┬──────────┬──────────┬──────────┬─────────┬─────────┬──────────┐
+│ Preset          │ Range    │ Shots    │ Duration │ Damage  │ Arc     │ Best For │
+├─────────────────┼──────────┼──────────┼──────────┼─────────┼─────────┼──────────┤
+│ Balanced        │ 52202    │ 30       │ 5s       │ 2000    │ 180°    │ Normal   │
+│ High Power      │ 75000    │ 20       │ 5s       │ 3000    │ 180°    │ Long-rng │
+│ Training        │ 30000    │ 100      │ 3s       │ 1000    │ 270°    │ Practice │
+│ Realistic       │ 100000   │ 15       │ 8s       │ 4000    │ 120°    │ YAL-1    │
+│ Overpowered     │ 100000   │ 100      │ 5s       │ 4000    │ 360°    │ Fun mode │
+│ Challenge       │ 25000    │ 10       │ 3s       │ 1500    │ 90°     │ Expert   │
+│ Anti-Ship       │ 40000    │ 50       │ 6s       │ 2500    │ 180°    │ Naval    │
+│ Point Defense   │ 20000    │ 60       │ 2s       │ 1000    │ 270°    │ Missiles │
+└─────────────────┴──────────┴──────────┴──────────┴─────────┴─────────┴──────────┘
+
+Note: All presets use PowerConsumption = 0 (chemical laser, no electrical power)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 QUICK ADJUSTMENTS
+
+Want more ammo?          → MaxShots = 50
+Want longer range?       → MaxRange = 75000
+Want higher damage?      → DamagePerShot = 3000
+Want quicker shots?      → ShotDuration = 3
+Want wider arc?          → FiringArc = 270 (or 360 for turret mode)
+Want easier gameplay?    → MaxShots = 100, ShotDuration = 3, FiringArc = 270
+Want more challenge?     → MaxShots = 15, MaxRange = 30000, FiringArc = 90
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 FIRING ARC GUIDE
+
+  90° = Narrow (nose-mounted, requires precise aim)
+ 180° = Forward hemisphere (default, realistic)
+ 270° = Wide arc (includes sides, easier to use)
+ 360° = Full sphere (turret mode, unrealistic but fun)
+
+Target must stay within arc during entire shot duration!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 DAMAGE CALCULATOR
+
+DPS = DamagePerShot / ShotDuration
+
+Examples:
+  2000 damage / 5s = 400 DPS (default)
+  3000 damage / 5s = 600 DPS
+  1000 damage / 3s = 333 DPS
+  4000 damage / 8s = 500 DPS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 TARGET HP REFERENCE
+
+Light Fighter:    500-800 HP    → 1 shot (200+ DPS)
+Heavy Fighter:    800-1200 HP   → 1 shot (250+ DPS)
+Light Bomber:     1200-1800 HP  → 1 shot (350+ DPS)
+Heavy Bomber:     1800-2500 HP  → 1 shot (400+ DPS)
+Destroyer:        2500-3500 HP  → 1-2 shots (400+ DPS)
+Cruiser:          3500-5000 HP  → 2-3 shots (400+ DPS)
+Battleship:       5000-8000 HP  → 3-4 shots (400+ DPS)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⏱️ FIRING TIME CALCULATOR
+
+Total Firing Time = MaxShots × ShotDuration
+
+Examples:
+  10 shots × 5s  = 50 seconds   (0.8 minutes)
+  30 shots × 5s  = 150 seconds  (2.5 minutes) ← default
+  50 shots × 5s  = 250 seconds  (4.2 minutes)
+  100 shots × 3s = 300 seconds  (5 minutes)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔧 TROUBLESHOOTING
+
+Config not working?
+  ✓ Save file after editing
+  ✓ Restart game completely
+  ✓ Check for typos
+  ✓ No quotes around numbers
+
+Game crashes?
+  ✓ Restore default values
+  ✓ No negative numbers
+  ✓ MaxShots must be whole number
+  ✓ Delete config, let it regenerate
+
+Can't find config?
+  ✓ Run game once with mod
+  ✓ Check BepInEx/config/ folder
+  ✓ Verify mod in BepInEx/plugins/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 MORE INFO
+
+CONFIGURATION.md     → Complete configuration guide
+CONFIG_EXAMPLE.txt   → 8 detailed presets
+README.md            → Full documentation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💾 EXAMPLE CONFIG FILE
+
+[COIL Laser]
+MaxRange = 52202
+MaxShots = 30
+ShotDuration = 5
+DamagePerShot = 2000
+FiringArc = 180
+PowerConsumption = 0
+EnableCOIL = true
+
+Copy this to: BepInEx/config/com.nuclearoption.coil.cfg
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 RANGE CALCULATION
+
+Default range allows hitting high-altitude targets:
+  Horizontal: 50,000m
+  Altitude:   15,000m
+  Range:      √(50000² + 15000²) = 52,202m
+
+This ensures the laser can engage aircraft at maximum altitude from standoff range.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎨 WEAPON ICON
+
+The COIL laser appears in-game with a distinctive green perimeter box icon with
+"COIL" text in the center, matching the size of other weapon graphics.
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  Remember: Always restart the game after changing configuration!            ║
+╚══════════════════════════════════════════════════════════════════════════════╝
