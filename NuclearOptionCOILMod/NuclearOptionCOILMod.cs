@@ -34,7 +34,7 @@ namespace NuclearOptionCOILMod
             EnableCOIL = Config.Bind("COIL Laser", "EnableCOIL", true, "Enable or disable the COIL laser mod");
             EnableABMLTrailer = Config.Bind("ABM-L Trailer", "EnableABMLTrailer", false, "Enable ABM-L ground laser trailer (requires QoL mod to be installed)");
             AutoFireDefault = Config.Bind("COIL Laser", "AutoFireDefault", true, "Start with auto-fire enabled (auto-engages missiles/bombs)");
-            AutoFireToggleKey = Config.Bind("COIL Laser", "AutoFireToggleKey", "V", "Key to toggle COIL auto-fire on/off when COIL station is selected");
+            AutoFireToggleKey = Config.Bind("COIL Laser", "AutoFireToggleKey", "B", "Key to toggle COIL auto-fire on/off when COIL station is selected");
             AutoFireSwitchDelay = Config.Bind("COIL Laser", "AutoFireSwitchDelay", 1f, "Seconds to wait before switching to a new auto-fire target (balance tuning)");
             GroundDamagePercent = Config.Bind("COIL Laser", "GroundDamagePercent", 10f, "Damage percentage against surface targets — ground vehicles, ships, and buildings (0-100). Full damage applies to aircraft and missiles only.");
 
