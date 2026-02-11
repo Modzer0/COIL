@@ -48,7 +48,7 @@ namespace NuclearOptionCOILMod
             if (EnableCOIL.Value)
             {
                 _harmony = new Harmony(PluginInfo.PLUGIN_GUID);
-                _harmony.PatchAll();
+                _harmony.PatchAll(typeof(COILModPlugin).Assembly);
                 Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} loaded!");
                 Logger.LogInfo($"COIL Laser Configuration:");
                 Logger.LogInfo($"  Max Range: {MaxRange.Value}m");
@@ -57,6 +57,14 @@ namespace NuclearOptionCOILMod
                 Logger.LogInfo($"  Damage/Shot: {DamagePerShot.Value}");
                 Logger.LogInfo($"  Firing Arc: {FiringArc.Value}°");
                 Logger.LogInfo($"  DPS: {DamagePerShot.Value / ShotDuration.Value}");
+                
+                // Log Harmony patch status
+                var patches = _harmony.GetPatchedMethods().ToList();
+                Logger.LogInfo($"Harmony applied {patches.Count} patches");
+                foreach (var method in patches)
+                {
+                    Logger.LogInfo($"  Patched: {method.DeclaringType?.Name}.{method.Name}");
+                }
             }
             else
             {

@@ -8,7 +8,6 @@ namespace NuclearOptionCOILMod
     /// <summary>
     /// Harmony patch to add COIL laser weapon to Darkreach bomber
     /// </summary>
-    [HarmonyPatch]
     public class COILLaserPatch
     {
         private static WeaponInfo _coilWeaponInfo;
