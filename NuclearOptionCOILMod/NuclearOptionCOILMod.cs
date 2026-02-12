@@ -23,6 +23,8 @@ namespace NuclearOptionCOILMod
         public static ConfigEntry<float> AutoFireSwitchDelay;
         public static ConfigEntry<float> GroundDamagePercent;
         public static ConfigEntry<float> MedusaLaserGroundDamagePercent;
+        public static ConfigEntry<bool> ABMLUseAmmo;
+        public static ConfigEntry<float> ABMLFireSeconds;
 
         private Harmony _harmony;
 
@@ -41,6 +43,8 @@ namespace NuclearOptionCOILMod
             AutoFireSwitchDelay = Config.Bind("COIL Laser", "AutoFireSwitchDelay", 1f, "Seconds to wait before switching to a new auto-fire target (balance tuning)");
             GroundDamagePercent = Config.Bind("COIL Laser", "GroundDamagePercent", 10f, "Damage percentage against surface targets — ground vehicles, ships, and buildings (0-100). Full damage applies to aircraft and missiles only.");
             MedusaLaserGroundDamagePercent = Config.Bind("Medusa Laser", "MedusaLaserGroundDamagePercent", 1f, "Damage percentage for the Medusa's laser against surface targets — ground vehicles, ships, and buildings (0-100)");
+            ABMLUseAmmo = Config.Bind("ABM-L Trailer", "ABMLUseAmmo", true, "When enabled, the ABM-L trailer has limited fire time and must be resupplied by ammo trucks or containers");
+            ABMLFireSeconds = Config.Bind("ABM-L Trailer", "ABMLFireSeconds", 120f, "Total seconds of laser fire time before the ABM-L trailer needs resupply");
 
             if (!EnableCOIL.Value) { Logger.LogInfo("Plugin " + PluginInfo.PLUGIN_NAME + " disabled"); return; }
 
