@@ -18,9 +18,11 @@ namespace NuclearOptionCOILMod
         public static ConfigEntry<bool> EnableCOIL;
         public static ConfigEntry<bool> EnableABMLTrailer;
         public static ConfigEntry<bool> AutoFireDefault;
+        public static ConfigEntry<bool> AutoFireAllowed;
         public static ConfigEntry<string> AutoFireToggleKey;
         public static ConfigEntry<float> AutoFireSwitchDelay;
         public static ConfigEntry<float> GroundDamagePercent;
+        public static ConfigEntry<float> MedusaLaserGroundDamagePercent;
 
         private Harmony _harmony;
 
@@ -33,10 +35,12 @@ namespace NuclearOptionCOILMod
             PowerConsumption = Config.Bind("COIL Laser", "PowerConsumption", 0f, "Power consumption per second (0 for chemical laser)");
             EnableCOIL = Config.Bind("COIL Laser", "EnableCOIL", true, "Enable or disable the COIL laser mod");
             EnableABMLTrailer = Config.Bind("ABM-L Trailer", "EnableABMLTrailer", false, "Enable ABM-L ground laser trailer (requires QoL mod to be installed)");
-            AutoFireDefault = Config.Bind("COIL Laser", "AutoFireDefault", true, "Start with auto-fire enabled (auto-engages missiles/bombs)");
+            AutoFireDefault = Config.Bind("COIL Laser", "AutoFireDefault", false, "Start with auto-fire enabled (auto-engages missiles/bombs)");
+            AutoFireAllowed = Config.Bind("COIL Laser", "AutoFireAllowed", false, "Allow COIL auto-fire capability. When false, auto-fire is completely disabled and the toggle key does nothing.");
             AutoFireToggleKey = Config.Bind("COIL Laser", "AutoFireToggleKey", "B", "Key to toggle COIL auto-fire on/off when COIL station is selected");
             AutoFireSwitchDelay = Config.Bind("COIL Laser", "AutoFireSwitchDelay", 1f, "Seconds to wait before switching to a new auto-fire target (balance tuning)");
             GroundDamagePercent = Config.Bind("COIL Laser", "GroundDamagePercent", 10f, "Damage percentage against surface targets — ground vehicles, ships, and buildings (0-100). Full damage applies to aircraft and missiles only.");
+            MedusaLaserGroundDamagePercent = Config.Bind("Medusa Laser", "MedusaLaserGroundDamagePercent", 1f, "Damage percentage for the Medusa's laser against surface targets — ground vehicles, ships, and buildings (0-100)");
 
             if (!EnableCOIL.Value) { Logger.LogInfo("Plugin " + PluginInfo.PLUGIN_NAME + " disabled"); return; }
 
@@ -44,6 +48,7 @@ namespace NuclearOptionCOILMod
             COILLaserPatch.SetLogger(Logger);
             COILLaser.SetLogger(Logger);
             ABMLTrailer.SetLogger(Logger);
+            ABMLTargetOverride.SetLogger(Logger);
 
             try
             {
@@ -60,6 +65,8 @@ namespace NuclearOptionCOILMod
                 PatchIt(typeof(WeaponManager), "PreviousWeaponStation", null, "WeaponManager_PreviousWeaponStation_Postfix", false);
                 PatchIt(typeof(Unit), "OnEnable", System.Type.EmptyTypes, "Unit_OnEnable_Postfix", false);
                 PatchIt(typeof(MountedCargo), "Fire", null, "MountedCargo_Fire_Postfix", false);
+                PatchIt(typeof(Laser), "FixedUpdate", System.Type.EmptyTypes, "Laser_FixedUpdate_Prefix", true);
+                PatchIt(typeof(Laser), "FixedUpdate", System.Type.EmptyTypes, "Laser_FixedUpdate_Postfix", false);
             }
             catch (System.Exception ex) { Logger.LogError("Harmony patches failed: " + ex.Message + "\n" + ex.StackTrace); }
 

@@ -687,5 +687,55 @@ namespace NuclearOptionCOILMod
             FillRect(p, s, x, y, x + sw, y + h, c);
             FillRect(p, s, x, y, x + w, y + sw, c);
         }
+
+        // =====================================================================
+        // PATCH: Laser.FixedUpdate PREFIX/POSTFIX
+        // Reduce Medusa laser damage against surface targets (ground, ships,
+        // buildings). Temporarily scales blastDamage/fireDamage fields before
+        // FixedUpdate runs, restores them after.
+        // =====================================================================
+
+        private static float _savedBlastDamage;
+        private static float _savedFireDamage;
+        private static bool _laserDamageModified;
+
+        public static void Laser_FixedUpdate_Prefix(Laser __instance)
+        {
+            _laserDamageModified = false;
+
+            try
+            {
+                // Only modify if the laser's current target is a surface unit
+                var traverse = Traverse.Create(__instance);
+                Unit currentTarget = traverse.Field("currentTarget").GetValue<Unit>();
+                if (currentTarget == null) return;
+                if (currentTarget is Aircraft || currentTarget is Missile) return;
+
+                // It's a surface target — scale damage down
+                float scale = Mathf.Clamp01(COILModPlugin.MedusaLaserGroundDamagePercent.Value / 100f);
+
+                _savedBlastDamage = traverse.Field("blastDamage").GetValue<float>();
+                _savedFireDamage = traverse.Field("fireDamage").GetValue<float>();
+
+                traverse.Field("blastDamage").SetValue(_savedBlastDamage * scale);
+                traverse.Field("fireDamage").SetValue(_savedFireDamage * scale);
+                _laserDamageModified = true;
+            }
+            catch { }
+        }
+
+        public static void Laser_FixedUpdate_Postfix(Laser __instance)
+        {
+            if (!_laserDamageModified) return;
+
+            try
+            {
+                var traverse = Traverse.Create(__instance);
+                traverse.Field("blastDamage").SetValue(_savedBlastDamage);
+                traverse.Field("fireDamage").SetValue(_savedFireDamage);
+                _laserDamageModified = false;
+            }
+            catch { }
+        }
     }
 }

@@ -408,6 +408,20 @@ namespace NuclearOptionCOILMod
                 Log($"Laser modified: blastDmg={dps * 0.7f}, fireDmg={dps * 0.3f}, range={COILModPlugin.MaxRange.Value}");
             }
 
+            // Modify Turret for instant targeting of nuclear cruise missiles
+            Turret[] turrets = ((MonoBehaviour)unit).GetComponentsInChildren<Turret>(true);
+            foreach (var turret in turrets)
+            {
+                var tt = Traverse.Create(turret);
+                // Zero lock time = fire immediately when on target
+                tt.Field("lockTime").SetValue(0f);
+                // Very fast target reassessment
+                tt.Field("targetAssessmentInterval").SetValue(0.25f);
+                // Fast traverse to snap onto targets quickly
+                tt.Field("traverseRate").SetValue(180f);
+                Log("Turret modified: lockTime=0, assessInterval=0.25s, traverseRate=180");
+            }
+
             // Set targeting to anti-missile only
             if (unit.definition != null)
             {
@@ -436,10 +450,23 @@ namespace NuclearOptionCOILMod
                     reqs.maxRange = COILModPlugin.MaxRange.Value;
                     reqs.minRange = 100f;
                     reqs.minAlignment = 360f;
+                    reqs.maxSpeed = 10000f;
+                    reqs.maxAltitude = 50000f;
                     station.WeaponInfo.targetRequirements = reqs;
+
+                    // High armor tier effectiveness so it can engage anything
+                    station.WeaponInfo.armorTierEffectiveness = 10f;
                 }
             }
-            Log("ABM-L targeting set to anti-missile only");
+            Log("ABM-L targeting set to anti-missile, instant lock, nuclear priority");
+
+            // Add nuclear priority targeting override component
+            var go = ((MonoBehaviour)unit).gameObject;
+            if (go.GetComponent<ABMLTargetOverride>() == null)
+            {
+                go.AddComponent<ABMLTargetOverride>();
+                Log("Added ABMLTargetOverride component for nuclear cruise missile priority");
+            }
         }
     }
 }

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
-    <AssemblyName>NuclearOptionCOILMod</AssemblyName>
+    <AssemblyName>NuclearOptionCOILMod-0.51-beta</AssemblyName>
     <Description>YAL-1 COIL Laser weapon mod for Nuclear Option</Description>
     <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -52,6 +52,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Delete Files="D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\NuclearOptionCOILMod.dll" Condition="Exists('D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\NuclearOptionCOILMod.dll')" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\" />
   </Target>
 

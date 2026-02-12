@@ -20,3 +20,4 @@ NuclearOptionCOILMod/obj/
 # NuGet
 packages/
 *.nupkg
+WORKING_CONTEXT.md

@@ -90,7 +90,7 @@ namespace NuclearOptionCOILMod
             _ammoAccumulator = 0f;
             _lastDamageTick = 0f;
             _initialized = true;
-            _autoFireEnabled = COILModPlugin.AutoFireDefault.Value;
+            _autoFireEnabled = COILModPlugin.AutoFireAllowed.Value && COILModPlugin.AutoFireDefault.Value;
 
             // Determine primary/secondary status
             if (attachedUnit != null)
@@ -192,6 +192,10 @@ namespace NuclearOptionCOILMod
             if (!_isPrimary || _shotsRemaining <= 0)
                 return;
 
+            // Safety: don't fire on the ground or with gear down
+            if (IsSafetyOn())
+                return;
+
             if (target != null && !IsTargetInFiringArc(target))
                 return;
 
@@ -219,6 +223,21 @@ namespace NuclearOptionCOILMod
             Transform unitTransform = ((MonoBehaviour)attachedUnit).transform;
             Vector3 toTarget = (((MonoBehaviour)target).transform.position - unitTransform.position).normalized;
             return Vector3.Angle(unitTransform.forward, toTarget) <= COILModPlugin.FiringArc.Value;
+        }
+
+        /// <summary>
+        /// Check if weapon safety is on (gear not retracted or on the ground).
+        /// Matches WeaponStation.SafetyIsOn logic.
+        /// </summary>
+        private bool IsSafetyOn()
+        {
+            Aircraft aircraft = attachedUnit as Aircraft;
+            if (aircraft == null) return false;
+            if (aircraft.gearState != LandingGear.GearState.LockedRetracted)
+                return true;
+            if (aircraft.radarAlt < 0.5f)
+                return true;
+            return false;
         }
 
         private void FixedUpdate()
@@ -286,6 +305,7 @@ namespace NuclearOptionCOILMod
         private void HandleAutoFireToggle()
         {
             if (attachedUnit == null) return;
+            if (!COILModPlugin.AutoFireAllowed.Value) return;
 
             // Only respond to input if this is the player's aircraft
             Aircraft aircraft = attachedUnit as Aircraft;
@@ -339,6 +359,7 @@ namespace NuclearOptionCOILMod
         {
             if (!_isPrimary) return;
             if (attachedUnit == null) return;
+            if (!COILModPlugin.AutoFireAllowed.Value) return;
 
             // Only show HUD for the player's aircraft
             Aircraft aircraft = attachedUnit as Aircraft;
@@ -379,6 +400,19 @@ namespace NuclearOptionCOILMod
         {
             if (attachedUnit == null || attachedUnit.disabled) return;
             if (attachedUnit.NetworkHQ == null) return;
+
+            // Safety: don't auto-fire on the ground or with gear down
+            if (IsSafetyOn())
+            {
+                if (_isFiring && !_manualFiring)
+                {
+                    _isFiring = false;
+                    _ammoAccumulator = 0f;
+                    _ammoChargedForBurst = false;
+                    _autoTarget = null;
+                }
+                return;
+            }
 
             // Scan for targets periodically
             if (Time.timeSinceLevelLoad - _lastTargetScan < TARGET_SCAN_INTERVAL)
