@@ -231,7 +231,9 @@ namespace NuclearOptionCOILMod
         public static void TryCreateVehicleDefinition()
         {
             if (_abmlVehicleDef != null) return;
-            if (!_qolDetected || !COILModPlugin.EnableABMLTrailer.Value) return;
+            if (!COILModPlugin.EnableABMLTrailer.Value) return;
+            if (!_qolDetected) DetectQoL();
+            if (!_qolDetected) return;
 
             try
             {
@@ -422,6 +424,9 @@ namespace NuclearOptionCOILMod
                 Encyclopedia.WeaponLookup.Add(_abmlMount.jsonKey, _abmlMount);
 
             Log("Late registration complete");
+
+            // Also create the mission editor vehicle definition
+            TryCreateVehicleDefinition();
         }
 
         /// <summary>

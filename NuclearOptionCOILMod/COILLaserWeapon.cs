@@ -749,6 +749,11 @@ namespace NuclearOptionCOILMod
         {
             try
             {
+                // Ensure ABM-L vehicle definition exists before the editor caches the list.
+                // This handles the case where QoL wasn't ready during AfterLoad but is now.
+                if (COILModPlugin.EnableABMLTrailer.Value)
+                    ABMLTrailer.TryCreateVehicleDefinition();
+
                 var field = AccessTools.Field(__instance.GetType(), "unitProviders");
                 if (field == null) return;
                 var dict = field.GetValue(null) as System.Collections.IDictionary;
