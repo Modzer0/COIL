@@ -24,6 +24,8 @@ namespace NuclearOptionCOILMod
         private static WeaponMount _abmlMount;
         // Track which LaserTrailer1 spawns should get COIL stats
         private static readonly HashSet<int> _pendingAbmlUnits = new HashSet<int>();
+        // Mission editor vehicle definition
+        private static VehicleDefinition _abmlVehicleDef;
 
         public static void SetLogger(BepInEx.Logging.ManualLogSource logger) => _logger = logger;
 
@@ -217,6 +219,96 @@ namespace NuclearOptionCOILMod
                 Log($"LookupIndex assigned by AfterLoad: {netDef.LookupIndex.Value}");
             else
                 LogError("LookupIndex NOT assigned — network serialization will fail!");
+
+            // Create mission editor vehicle definition
+            TryCreateVehicleDefinition();
+        }
+
+        /// <summary>
+        /// Creates a VehicleDefinition for the ABM-L so it appears in the
+        /// mission editor's vehicle list. Clones the LaserTrailer1's definition.
+        /// </summary>
+        public static void TryCreateVehicleDefinition()
+        {
+            if (_abmlVehicleDef != null) return;
+            if (!_qolDetected || !COILModPlugin.EnableABMLTrailer.Value) return;
+
+            try
+            {
+                var laserTrailerDef = UnityEngine.Resources.FindObjectsOfTypeAll<VehicleDefinition>()
+                    .FirstOrDefault(d => d.name != null &&
+                        d.name.IndexOf("LaserTrailer1", StringComparison.InvariantCultureIgnoreCase) >= 0
+                        && !d.disabled);
+
+                if (laserTrailerDef == null)
+                {
+                    laserTrailerDef = UnityEngine.Resources.FindObjectsOfTypeAll<VehicleDefinition>()
+                        .FirstOrDefault(d => d.unitName != null &&
+                            d.unitName.IndexOf("Laser", StringComparison.InvariantCultureIgnoreCase) >= 0
+                            && d.unitName.IndexOf("Trailer", StringComparison.InvariantCultureIgnoreCase) >= 0
+                            && !d.disabled);
+                }
+
+                if (laserTrailerDef == null)
+                {
+                    Log("LaserTrailer1 VehicleDefinition not found — mission editor entry skipped");
+                    return;
+                }
+
+                Log($"Found LaserTrailer1 VehicleDefinition: name={laserTrailerDef.name}, unitName={laserTrailerDef.unitName}");
+
+                _abmlVehicleDef = UnityEngine.Object.Instantiate(laserTrailerDef);
+                _abmlVehicleDef.name = "ABMLTrailer1";
+                _abmlVehicleDef.jsonKey = "ABMLTrailer1";
+                _abmlVehicleDef.unitName = "HLT ABM-L Trailer";
+                _abmlVehicleDef.bogeyName = "ABM-L";
+                _abmlVehicleDef.code = "ABM-L";
+                _abmlVehicleDef.description = "Anti-Ballistic Missile Laser — COIL-based ground defense. Prioritizes nuclear cruise missiles.";
+                _abmlVehicleDef.disabled = false;
+                _abmlVehicleDef.dontAutomaticallyAddToEncyclopedia = false;
+                _abmlVehicleDef.unitPrefab = laserTrailerDef.unitPrefab;
+                _abmlVehicleDef.roleIdentity = new RoleIdentity
+                {
+                    antiSurface = 0f, antiAir = 0f, antiMissile = 1f, antiRadar = 0f
+                };
+
+                Encyclopedia enc = Encyclopedia.i;
+                if (enc == null) { Log("Encyclopedia.i null — cannot register"); return; }
+
+                if (!enc.vehicles.Contains(_abmlVehicleDef))
+                    enc.vehicles.Add(_abmlVehicleDef);
+
+                if (!Encyclopedia.Lookup.ContainsKey(_abmlVehicleDef.jsonKey))
+                    Encyclopedia.Lookup.Add(_abmlVehicleDef.jsonKey, _abmlVehicleDef);
+
+                var vehNetDef = (INetworkDefinition)_abmlVehicleDef;
+                if (!vehNetDef.LookupIndex.HasValue)
+                {
+                    int newIndex = enc.IndexLookup.Count;
+                    enc.IndexLookup.Add(vehNetDef);
+                    vehNetDef.LookupIndex = newIndex;
+                }
+
+                _abmlVehicleDef.CacheMass();
+                Log($"ABM-L VehicleDefinition registered: unitName={_abmlVehicleDef.unitName}, jsonKey={_abmlVehicleDef.jsonKey}");
+            }
+            catch (Exception ex)
+            {
+                LogError($"Failed to create ABM-L VehicleDefinition: {ex.Message}\n{ex.StackTrace}");
+            }
+        }
+
+        public static VehicleDefinition GetVehicleDefinition() => _abmlVehicleDef;
+
+        /// <summary>
+        /// Called when the mission editor spawns an ABM-L. Flags the next
+        /// LaserTrailer1 spawn for COIL stat application.
+        /// </summary>
+        public static void OnEditorSpawnDetected()
+        {
+            _abmlDeployPending = true;
+            _lastAbmlDeployTime = Time.timeSinceLevelLoad;
+            Log("Mission editor ABM-L spawn — next LaserTrailer1 will get COIL stats");
         }
 
         private static void AddToCargoHardpoints()

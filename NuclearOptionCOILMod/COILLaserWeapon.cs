@@ -2,6 +2,7 @@ using HarmonyLib;
 using UnityEngine;
 using System.Collections.Generic;
 using NuclearOption.SavedMission;
+using System.Collections;
 
 namespace NuclearOptionCOILMod
 {
@@ -736,6 +737,59 @@ namespace NuclearOptionCOILMod
                 _laserDamageModified = false;
             }
             catch { }
+        }
+
+        // =====================================================================
+        // PATCH: NewUnitPanel.Awake PREFIX
+        // Clear the static unitProviders cache so the mission editor rebuilds
+        // its unit list from Encyclopedia, picking up our ABM-L vehicle.
+        // =====================================================================
+
+        public static void NewUnitPanel_Awake_Prefix(object __instance)
+        {
+            try
+            {
+                var field = AccessTools.Field(__instance.GetType(), "unitProviders");
+                if (field == null) return;
+                var dict = field.GetValue(null) as System.Collections.IDictionary;
+                if (dict != null && dict.Count > 0)
+                {
+                    dict.Clear();
+                    Log("Cleared NewUnitPanel.unitProviders cache for mission editor refresh");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                LogError($"NewUnitPanel_Awake_Prefix error: {ex.Message}");
+            }
+        }
+
+        // =====================================================================
+        // PATCH: Spawner.SpawnFromUnitDefinitionInEditor POSTFIX
+        // Detect when the mission editor spawns our ABM-L VehicleDefinition
+        // and flag the spawned LaserTrailer1 for COIL stat application.
+        // =====================================================================
+
+        public static void Spawner_SpawnFromUnitDefinitionInEditor_Postfix(
+            UnitDefinition placingDefinition, Unit __result)
+        {
+            try
+            {
+                if (placingDefinition == null) return;
+                var abmlDef = ABMLTrailer.GetVehicleDefinition();
+                if (abmlDef == null || placingDefinition != abmlDef) return;
+
+                // Flag this spawn for COIL stats
+                ABMLTrailer.OnEditorSpawnDetected();
+
+                // Also try to apply directly if the unit is already enabled
+                if (__result != null)
+                    ABMLTrailer.OnUnitSpawned(__result);
+            }
+            catch (System.Exception ex)
+            {
+                LogError($"Spawner_SpawnFromUnitDefinitionInEditor_Postfix error: {ex.Message}");
+            }
         }
     }
 }

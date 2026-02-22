@@ -71,6 +71,24 @@ namespace NuclearOptionCOILMod
                 PatchIt(typeof(MountedCargo), "Fire", null, "MountedCargo_Fire_Postfix", false);
                 PatchIt(typeof(Laser), "FixedUpdate", System.Type.EmptyTypes, "Laser_FixedUpdate_Prefix", true);
                 PatchIt(typeof(Laser), "FixedUpdate", System.Type.EmptyTypes, "Laser_FixedUpdate_Postfix", false);
+
+                // Mission editor patches — use AccessTools to find types by name
+                // since NewUnitPanel is in a nested namespace
+                var newUnitPanelType = AccessTools.TypeByName("NuclearOption.MissionEditorScripts.Buttons.NewUnitPanel");
+                if (newUnitPanelType != null)
+                {
+                    PatchIt(newUnitPanelType, "Awake", System.Type.EmptyTypes, "NewUnitPanel_Awake_Prefix", true);
+                    Logger.LogInfo("NewUnitPanel.Awake patch registered");
+                }
+
+                var spawnerType = typeof(Spawner);
+                var spawnEditorMethod = AccessTools.Method(spawnerType, "SpawnFromUnitDefinitionInEditor");
+                if (spawnEditorMethod != null)
+                {
+                    var patch = AccessTools.Method(typeof(COILLaserPatch), "Spawner_SpawnFromUnitDefinitionInEditor_Postfix");
+                    _harmony.Patch(spawnEditorMethod, postfix: new HarmonyMethod(patch));
+                    Logger.LogInfo("Spawner.SpawnFromUnitDefinitionInEditor postfix registered");
+                }
             }
             catch (System.Exception ex) { Logger.LogError("Harmony patches failed: " + ex.Message + "\n" + ex.StackTrace); }
 
