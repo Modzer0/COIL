@@ -749,23 +749,49 @@ namespace NuclearOptionCOILMod
         {
             try
             {
+                Log(">>> NewUnitPanel.Awake PREFIX firing <<<");
+
                 // Ensure ABM-L vehicle definition exists before the editor caches the list.
                 // This handles the case where QoL wasn't ready during AfterLoad but is now.
                 if (COILModPlugin.EnableABMLTrailer.Value)
+                {
                     ABMLTrailer.TryCreateVehicleDefinition();
+                    var vehDef = ABMLTrailer.GetVehicleDefinition();
+                    Log($"ABM-L VehicleDefinition: {(vehDef != null ? vehDef.unitName : "NULL")}");
+
+                    // Verify it's in Encyclopedia.i.vehicles
+                    if (vehDef != null && Encyclopedia.i != null)
+                    {
+                        bool inList = Encyclopedia.i.vehicles.Contains(vehDef);
+                        Log($"ABM-L in Encyclopedia.i.vehicles: {inList} (total vehicles: {Encyclopedia.i.vehicles.Count})");
+                        if (!inList)
+                        {
+                            Encyclopedia.i.vehicles.Add(vehDef);
+                            Log("Force-added ABM-L to Encyclopedia.i.vehicles");
+                        }
+                    }
+                }
 
                 var field = AccessTools.Field(__instance.GetType(), "unitProviders");
-                if (field == null) return;
-                var dict = field.GetValue(null) as System.Collections.IDictionary;
-                if (dict != null && dict.Count > 0)
+                if (field == null)
                 {
+                    LogError("unitProviders field not found on NewUnitPanel!");
+                    return;
+                }
+                var dict = field.GetValue(null) as System.Collections.IDictionary;
+                if (dict != null)
+                {
+                    Log($"unitProviders has {dict.Count} entries — clearing to force rebuild");
                     dict.Clear();
-                    Log("Cleared NewUnitPanel.unitProviders cache for mission editor refresh");
+                }
+                else
+                {
+                    Log("unitProviders dict is null — will be built fresh by Awake");
                 }
             }
             catch (System.Exception ex)
             {
-                LogError($"NewUnitPanel_Awake_Prefix error: {ex.Message}");
+                LogError($"NewUnitPanel_Awake_Prefix error: {ex.Message}\n{ex.StackTrace}");
             }
         }
 

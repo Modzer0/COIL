@@ -78,7 +78,25 @@ namespace NuclearOptionCOILMod
                 if (newUnitPanelType != null)
                 {
                     PatchIt(newUnitPanelType, "Awake", System.Type.EmptyTypes, "NewUnitPanel_Awake_Prefix", true);
-                    Logger.LogInfo("NewUnitPanel.Awake patch registered");
+                    Logger.LogInfo("NewUnitPanel.Awake patch registered successfully");
+                }
+                else
+                {
+                    Logger.LogError("FAILED to find NewUnitPanel type — mission editor integration will not work!");
+                    Logger.LogError("Tried: NuclearOption.MissionEditorScripts.Buttons.NewUnitPanel");
+                    // Dump all types containing "NewUnit" or "UnitPanel" for debugging
+                    foreach (var asm in System.AppDomain.CurrentDomain.GetAssemblies())
+                    {
+                        try
+                        {
+                            foreach (var t in asm.GetTypes())
+                            {
+                                if (t.Name.Contains("NewUnit") || t.Name.Contains("UnitPanel"))
+                                    Logger.LogInfo($"  Found type: {t.FullName} in {asm.GetName().Name}");
+                            }
+                        }
+                        catch { }
+                    }
                 }
 
                 var spawnerType = typeof(Spawner);
@@ -88,6 +106,10 @@ namespace NuclearOptionCOILMod
                     var patch = AccessTools.Method(typeof(COILLaserPatch), "Spawner_SpawnFromUnitDefinitionInEditor_Postfix");
                     _harmony.Patch(spawnEditorMethod, postfix: new HarmonyMethod(patch));
                     Logger.LogInfo("Spawner.SpawnFromUnitDefinitionInEditor postfix registered");
+                }
+                else
+                {
+                    Logger.LogError("FAILED to find Spawner.SpawnFromUnitDefinitionInEditor method");
                 }
             }
             catch (System.Exception ex) { Logger.LogError("Harmony patches failed: " + ex.Message + "\n" + ex.StackTrace); }

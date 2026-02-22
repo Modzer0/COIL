@@ -253,7 +253,12 @@ namespace NuclearOptionCOILMod
 
                 if (laserTrailerDef == null)
                 {
-                    Log("LaserTrailer1 VehicleDefinition not found — mission editor entry skipped");
+                    Log("LaserTrailer1 VehicleDefinition not found — dumping all VehicleDefinitions:");
+                    var allVehDefs = UnityEngine.Resources.FindObjectsOfTypeAll<VehicleDefinition>();
+                    foreach (var vd in allVehDefs)
+                        Log($"  VehDef: name={vd.name}, unitName={vd.unitName}, disabled={vd.disabled}");
+                    Log($"Total VehicleDefinitions found: {allVehDefs.Length}");
+                    Log("Mission editor entry skipped");
                     return;
                 }
 

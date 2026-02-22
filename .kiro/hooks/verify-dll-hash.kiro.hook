@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "name": "Verify Deployed DLL Hash",
+  "description": "After any build completes (detected by the build output DLL changing), compares the SHA256 hash of the build output DLL against the deployed DLL in BepInEx/plugins/. Reports mismatch if the deployed version is stale.",
+  "version": "1",
+  "when": {
+    "type": "postToolUse",
+    "toolTypes": [
+      "shell"
+    ]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "powershell -NoProfile -Command \"$buildDir = 'NuclearOptionCOILMod\\bin\\Release\\net46'; $pluginDir = 'D:\\SteamLibrary\\steamapps\\common\\Nuclear Option\\BepInEx\\plugins'; $buildDlls = Get-ChildItem $buildDir -Filter 'NuclearOptionCOILMod*.dll' -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1; if (-not $buildDlls) { Write-Output 'SKIP: No build output DLL found'; exit 0 }; $buildDll = $buildDlls.FullName; $dllName = $buildDlls.Name; $deployedDll = Join-Path $pluginDir $dllName; if (-not (Test-Path $deployedDll)) { Write-Output \\\"MISMATCH: $dllName not found in plugins folder\\\"; exit 1 }; $buildHash = (Get-FileHash $buildDll -Algorithm SHA256).Hash; $deployHash = (Get-FileHash $deployedDll -Algorithm SHA256).Hash; if ($buildHash -eq $deployHash) { Write-Output \\\"OK: $dllName hashes match ($($buildHash.Substring(0,12))...)\\\" } else { Write-Output \\\"MISMATCH: Build=$($buildHash.Substring(0,16))... Deployed=$($deployHash.Substring(0,16))...\\\"; Write-Output 'Run: dotnet build NuclearOptionCOILMod/NuclearOptionCOILMod.csproj -c Release'; exit 1 }\"",
+    "timeout": 15
+  }
+}
