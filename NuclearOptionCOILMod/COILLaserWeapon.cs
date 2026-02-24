@@ -810,16 +810,27 @@ namespace NuclearOptionCOILMod
                 var abmlDef = ABMLTrailer.GetVehicleDefinition();
                 if (abmlDef == null || placingDefinition != abmlDef) return;
 
-                // Flag this spawn for COIL stats
-                ABMLTrailer.OnEditorSpawnDetected();
+                Log($"Editor spawned ABM-L: reassigning definition and name");
 
-                // Also try to apply directly if the unit is already enabled
+                // The spawned unit has the LADS definition because they share a prefab.
+                // Reassign to our ABM-L definition so the name and identity are correct.
                 if (__result != null)
+                {
+                    __result.definition = abmlDef;
+                    // unitName is a SyncVar set by SpawnVehicle from the prefab's definition.
+                    // Override it with our ABM-L name.
+                    var unitTraverse = Traverse.Create(__result);
+                    unitTraverse.Property("NetworkunitName").SetValue(abmlDef.unitName);
+                    Log($"Reassigned definition to {abmlDef.unitName}, unitName={__result.unitName}");
+
+                    // Flag this spawn for COIL stats
+                    ABMLTrailer.OnEditorSpawnDetected();
                     ABMLTrailer.OnUnitSpawned(__result);
+                }
             }
             catch (System.Exception ex)
             {
-                LogError($"Spawner_SpawnFromUnitDefinitionInEditor_Postfix error: {ex.Message}");
+                LogError($"Spawner_SpawnFromUnitDefinitionInEditor_Postfix error: {ex.Message}\n{ex.StackTrace}");
             }
         }
     }

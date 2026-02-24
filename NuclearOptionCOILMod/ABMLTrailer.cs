@@ -488,6 +488,17 @@ namespace NuclearOptionCOILMod
         {
             Log($"Applying COIL stats to spawned trailer: {unit.name}");
 
+            // Reassign definition to ABM-L so the name and identity are correct.
+            // The spawned unit has the LADS definition because they share a prefab.
+            if (_abmlVehicleDef != null)
+            {
+                unit.definition = _abmlVehicleDef;
+                var unitTraverse = Traverse.Create(unit);
+                try { unitTraverse.Property("NetworkunitName").SetValue(_abmlVehicleDef.unitName); }
+                catch { /* May fail if not yet networked */ }
+                Log($"Reassigned definition to {_abmlVehicleDef.unitName}");
+            }
+
             // Modify Laser components
             Laser[] lasers = ((MonoBehaviour)unit).GetComponentsInChildren<Laser>(true);
             foreach (var laser in lasers)
