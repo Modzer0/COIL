@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
-    <AssemblyName>NuclearOptionCOILMod-0.54-beta</AssemblyName>
+    <AssemblyName>NuclearOptionCOILMod-0.55-beta</AssemblyName>
     <Description>YAL-1 COIL Laser weapon mod for Nuclear Option</Description>
     <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -55,6 +55,7 @@
     <Delete Files="D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\NuclearOptionCOILMod.dll" Condition="Exists('D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\NuclearOptionCOILMod.dll')" />
     <Delete Files="D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\NuclearOptionCOILMod-0.52-beta.dll" Condition="Exists('D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\NuclearOptionCOILMod-0.52-beta.dll')" />
     <Delete Files="D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\NuclearOptionCOILMod-0.53-beta.dll" Condition="Exists('D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\NuclearOptionCOILMod-0.53-beta.dll')" />
+    <Delete Files="D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\NuclearOptionCOILMod-0.54-beta.dll" Condition="Exists('D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\NuclearOptionCOILMod-0.54-beta.dll')" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="D:\SteamLibrary\steamapps\common\Nuclear Option\BepInEx\plugins\" />
   </Target>
 
