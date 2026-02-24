@@ -160,7 +160,7 @@ namespace NuclearOptionCOILMod
                 {
                     if (w == null) continue;
                     if (w.mountName == "ABM COIL Laser") hasCOIL = true;
-                    if (w.mountName == "HLT ABM-L Trailer") hasABML = true;
+                    if (w.mountName == "ABM-L Trailer") hasABML = true;
                 }
 
                 if (hasCOIL && _coilWeaponMount != null)
@@ -361,7 +361,7 @@ namespace NuclearOptionCOILMod
                 // Handle ABM-L trailer: tag the MountedCargo so we can detect
                 // its deployment in the Fire postfix. Use GetInfo() which returns
                 // our preserved WeaponInfo, not the one Initialize() overwrote.
-                if (weaponMount.mountName == "HLT ABM-L Trailer")
+                if (weaponMount.mountName == "ABM-L Trailer")
                 {
                     Log($"SpawnMount POSTFIX - ABM-L on {aircraft.name}");
                     var cargos = __result.GetComponentsInChildren<MountedCargo>(true);
@@ -478,7 +478,7 @@ namespace NuclearOptionCOILMod
                 // Check if this cargo's parent weapon station has ABM-L info
                 // or if the cargo was flagged as ABM-L
                 if (__instance.gameObject.name.Contains("ABML_Tagged") ||
-                    (__instance.info != null && __instance.info.weaponName == "HLT ABM-L Trailer"))
+                    (__instance.info != null && __instance.info.weaponName == "ABM-L Trailer"))
                 {
                     ABMLTrailer.OnAbmlDeployed();
                 }

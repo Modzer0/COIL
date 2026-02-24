@@ -125,9 +125,9 @@ namespace NuclearOptionCOILMod
             // Create custom WeaponInfo for display purposes
             _abmlInfo = ScriptableObject.CreateInstance<WeaponInfo>();
             _abmlInfo.name = "ABMLTrailer1_info";
-            _abmlInfo.weaponName = "HLT ABM-L Trailer";
+            _abmlInfo.weaponName = "ABM-L Trailer";
             _abmlInfo.shortName = "ABM-L";
-            _abmlInfo.description = "Anti-Ballistic Missile Laser - COIL-based ground defense";
+            _abmlInfo.description = "1MW COIL Anti-Ballistic Missile Laser with 120 seconds of firing time. Place an ammo truck or container nearby for resupply.";
             _abmlInfo.fireInterval = 0f;
             _abmlInfo.energy = false;
             _abmlInfo.gun = false;
@@ -178,7 +178,7 @@ namespace NuclearOptionCOILMod
             // our info and mountName because Cargo=true causes it to read from the
             // prefab's MountedCargo.info. We fix this in a postfix after AfterLoad.
             _abmlMount.info = _abmlInfo;
-            _abmlMount.mountName = "HLT ABM-L Trailer";
+            _abmlMount.mountName = "ABM-L Trailer";
             encyclopedia.weaponMounts.Add(_abmlMount);
 
             Log($"Added ABM-L to encyclopedia.weaponMounts (count: {encyclopedia.weaponMounts.Count})");
@@ -203,7 +203,7 @@ namespace NuclearOptionCOILMod
             // sets ammo = number of Weapon components in prefab. Restore ours.
             string prevInfo = _abmlMount.info != null ? _abmlMount.info.weaponName : "null";
             _abmlMount.info = _abmlInfo;
-            _abmlMount.mountName = "HLT ABM-L Trailer";
+            _abmlMount.mountName = "ABM-L Trailer";
             // Ammo for cargo = number of deployable units (1 trailer)
             _abmlMount.ammo = 1;
 
@@ -267,10 +267,10 @@ namespace NuclearOptionCOILMod
                 _abmlVehicleDef = UnityEngine.Object.Instantiate(laserTrailerDef);
                 _abmlVehicleDef.name = "ABMLTrailer1";
                 _abmlVehicleDef.jsonKey = "ABMLTrailer1";
-                _abmlVehicleDef.unitName = "HLT ABM-L Trailer";
-                _abmlVehicleDef.bogeyName = "ABM-L";
+                _abmlVehicleDef.unitName = "ABM-L Trailer";
+                _abmlVehicleDef.bogeyName = "ABM-L Trailer";
                 _abmlVehicleDef.code = "ABM-L";
-                _abmlVehicleDef.description = "Anti-Ballistic Missile Laser — COIL-based ground defense. Prioritizes nuclear cruise missiles.";
+                _abmlVehicleDef.description = "1MW COIL Anti-Ballistic Missile Laser with 120 seconds of firing time. Prioritizes nuclear cruise missiles. Place an ammo truck or container nearby for resupply.";
                 _abmlVehicleDef.disabled = false;
                 _abmlVehicleDef.dontAutomaticallyAddToEncyclopedia = false;
                 _abmlVehicleDef.unitPrefab = laserTrailerDef.unitPrefab;
@@ -411,7 +411,7 @@ namespace NuclearOptionCOILMod
 
             // Restore our custom values
             _abmlMount.info = _abmlInfo;
-            _abmlMount.mountName = "HLT ABM-L Trailer";
+            _abmlMount.mountName = "ABM-L Trailer";
             _abmlMount.ammo = 1;
 
             // Register in IndexLookup manually
