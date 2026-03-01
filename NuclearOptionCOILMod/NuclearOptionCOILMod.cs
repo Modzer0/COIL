@@ -111,6 +111,19 @@ namespace NuclearOptionCOILMod
                 {
                     Logger.LogError("FAILED to find Spawner.SpawnFromUnitDefinitionInEditor method");
                 }
+
+                // Patch TrySpawnVehicle for mission load — detect ABM-L by saved type
+                var trySpawnVehicleMethod = AccessTools.Method(spawnerType, "TrySpawnVehicle");
+                if (trySpawnVehicleMethod != null)
+                {
+                    var patch = AccessTools.Method(typeof(COILLaserPatch), "Spawner_TrySpawnVehicle_Postfix");
+                    _harmony.Patch(trySpawnVehicleMethod, postfix: new HarmonyMethod(patch));
+                    Logger.LogInfo("Spawner.TrySpawnVehicle postfix registered");
+                }
+                else
+                {
+                    Logger.LogError("FAILED to find Spawner.TrySpawnVehicle method");
+                }
             }
             catch (System.Exception ex) { Logger.LogError("Harmony patches failed: " + ex.Message + "\n" + ex.StackTrace); }
 

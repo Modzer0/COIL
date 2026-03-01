@@ -308,6 +308,24 @@ namespace NuclearOptionCOILMod
         public static VehicleDefinition GetVehicleDefinition() => _abmlVehicleDef;
 
         /// <summary>
+        /// Re-adds the ABM-L VehicleDefinition to a fresh Encyclopedia instance.
+        /// Called from Encyclopedia.AfterLoad PREFIX when AfterLoad runs again
+        /// (e.g., on scene/mission load). AfterLoad clears Lookup and rebuilds
+        /// from the lists, so our def must be in vehicles before that happens.
+        /// </summary>
+        public static void ReAddToEncyclopedia(Encyclopedia encyclopedia)
+        {
+            if (_abmlVehicleDef == null) return;
+            if (!COILModPlugin.EnableABMLTrailer.Value) return;
+
+            if (!encyclopedia.vehicles.Contains(_abmlVehicleDef))
+            {
+                encyclopedia.vehicles.Add(_abmlVehicleDef);
+                Log($"Re-added ABM-L VehicleDefinition to encyclopedia.vehicles for mission load");
+            }
+        }
+
+        /// <summary>
         /// Called when the mission editor spawns an ABM-L. Flags the next
         /// LaserTrailer1 spawn for COIL stat application.
         /// </summary>

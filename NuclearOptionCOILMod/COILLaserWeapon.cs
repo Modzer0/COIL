@@ -58,7 +58,10 @@ namespace NuclearOptionCOILMod
                         __instance.weaponMounts.Add(_coilWeaponMount);
                         Log("Re-added existing COIL mount to encyclopedia.weaponMounts");
                     }
-                    // Also handle ABM-L trailer
+                    // Re-add ABM-L VehicleDefinition to the fresh encyclopedia instance
+                    // so AfterLoad includes it when rebuilding Lookup/IndexLookup
+                    ABMLTrailer.ReAddToEncyclopedia(__instance);
+                    // Also handle ABM-L trailer mount
                     ABMLTrailer.TryInitialize(__instance);
                     return;
                 }
@@ -831,6 +834,46 @@ namespace NuclearOptionCOILMod
             catch (System.Exception ex)
             {
                 LogError($"Spawner_SpawnFromUnitDefinitionInEditor_Postfix error: {ex.Message}\n{ex.StackTrace}");
+            }
+        }
+
+        // =====================================================================
+        // PATCH: Spawner.TrySpawnVehicle POSTFIX
+        // When loading a saved mission, detect ABM-L units by their saved type
+        // ("ABMLTrailer1") and reassign definition + apply COIL stats.
+        // =====================================================================
+
+        public static void Spawner_TrySpawnVehicle_Postfix(
+            NuclearOption.SavedMission.SavedVehicle savedVehicle,
+            GroundVehicle spawnedVehicle, bool __result)
+        {
+            try
+            {
+                if (!__result || spawnedVehicle == null || savedVehicle == null) return;
+                if (savedVehicle.type != "ABMLTrailer1") return;
+
+                var abmlDef = ABMLTrailer.GetVehicleDefinition();
+                if (abmlDef == null)
+                {
+                    Log("TrySpawnVehicle: ABM-L type detected but VehicleDefinition not ready");
+                    return;
+                }
+
+                Log($"Mission load: spawned ABM-L from saved type '{savedVehicle.type}'");
+
+                // Reassign definition from LADS to ABM-L
+                ((Unit)spawnedVehicle).definition = abmlDef;
+                var unitTraverse = Traverse.Create((Unit)spawnedVehicle);
+                try { unitTraverse.Property("NetworkunitName").SetValue(abmlDef.unitName); }
+                catch { }
+
+                // Apply COIL stats
+                ABMLTrailer.OnEditorSpawnDetected();
+                ABMLTrailer.OnUnitSpawned((Unit)spawnedVehicle);
+            }
+            catch (System.Exception ex)
+            {
+                LogError($"Spawner_TrySpawnVehicle_Postfix error: {ex.Message}\n{ex.StackTrace}");
             }
         }
     }
